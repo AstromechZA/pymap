@@ -16,22 +16,15 @@ def coords_to_tile(lat, lon, zoom=10):
     return (xtile, ytile)
 
 def get_tile_indices(x_center, y_center, cov_width, cov_height):
-    x_tile = int(math.floor(x_center))
-    y_tile = int(math.floor(y_center))
-
-    x_offset = int((x_center % 1) * 256)
-    y_offset = int((y_center % 1) * 256)
-
-    left_border = int(math.ceil(((cov_width / 2.0) - x_offset) / 256.0))
-    top_border = int(math.ceil(((cov_height / 2.0) - y_offset) / 256.0))
-
-    right_border = int(math.ceil(((cov_width / 2.0) + x_offset) / 256.0))
-    bottom_border = int(math.ceil(((cov_height / 2.0) + y_offset) / 256.0))
+    left = int(math.floor(x_center) - math.ceil(cov_width / 512.0 - (x_center % 1)))
+    right = int(math.floor(x_center) + math.ceil(cov_width / 512.0 + (x_center % 1)))
+    top = int(math.floor(y_center) - math.ceil(cov_height / 512.0 - (y_center % 1)))
+    bottom = int(math.floor(y_center) + math.ceil(cov_height / 512.0 + (y_center % 1)))
 
     grid = list()
-    for x in xrange(x_tile - left_border, x_tile + right_border):
+    for x in xrange(left, right):
         row = list()
-        for y in xrange(y_tile - top_border, y_tile + bottom_border):
+        for y in xrange(top, bottom):
             row.append((x, y))
         grid.append(tuple(row))
     return tuple(grid)
@@ -41,7 +34,7 @@ def main():
     zoom = 14
     image_width = 777
     image_height = 400
-    xtile, ytile = coords_to_tile(40.689167,-74.044444, zoom=zoom)
+    xtile, ytile = coords_to_tile(40.689167, -74.044444, zoom=zoom)
     grid_indices = get_tile_indices(xtile, ytile, image_width, image_height)
 
     tile_grid_width = len(grid_indices) * 256
