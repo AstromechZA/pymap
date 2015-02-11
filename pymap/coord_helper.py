@@ -22,9 +22,9 @@ def get_tile_indices(x_center, y_center, cov_width, cov_height):
     bottom = int(math.floor(y_center) + math.ceil(cov_height / 512.0 + (y_center % 1)))
 
     grid = list()
-    for x in xrange(left, right):
+    for y in xrange(top, bottom):
         row = list()
-        for y in xrange(top, bottom):
+        for x in xrange(left, right):
             row.append((x, y))
         grid.append(tuple(row))
     return tuple(grid)
