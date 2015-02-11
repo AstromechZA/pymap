@@ -20,15 +20,7 @@ def get_tile_indices(x_center, y_center, cov_width, cov_height):
     right = int(math.floor(x_center) + math.ceil(cov_width / 512.0 + (x_center % 1)))
     top = int(math.floor(y_center) - math.ceil(cov_height / 512.0 - (y_center % 1)))
     bottom = int(math.floor(y_center) + math.ceil(cov_height / 512.0 + (y_center % 1)))
-
-    grid = list()
-    for y in xrange(top, bottom):
-        row = list()
-        for x in xrange(left, right):
-            row.append((x, y))
-        grid.append(tuple(row))
-    return tuple(grid)
-
+    return tuple([tuple([(x, y) for x in xrange(left, right)]) for y in xrange(top, bottom)])
 
 def main():
     zoom = 14
