@@ -32,7 +32,10 @@ setup(
     scripts=['bin/pymap'],
 
     # requirements
-    install_requires=[],
+    install_requires=[
+        'requests==2.5.1',
+        'Wand==0.3.9'
+    ],
     setup_requires=['flake8'],
 
     # tests

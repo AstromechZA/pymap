@@ -4,12 +4,19 @@ from wand.image import Image
 
 from .coord_helper import gen_tile_indices, coords_to_tile
 
-TILE_URL = "http://otile1.mqcdn.com/tiles/1.0.0/map/{zoom}/{x}/{y}.jpg"
+TILE_URLS = {
+    'osm': "http://a.tile.openstreetmap.org/{zoom}/{x}/{y}.png",
+    'mq': "http://otile1.mqcdn.com/tiles/1.0.0/map/{zoom}/{x}/{y}.jpg",
+    'light': "http://a.basemaps.cartocdn.com/light_all/{zoom}/{x}/{y}.png",
+    'dark': "http://a.basemaps.cartocdn.com/dark_all/{zoom}/{x}/{y}.png",
+    'watercolor': "http://tile.stamen.com/watercolor/{zoom}/{x}/{y}.jpg",
+    'toner': "http://tile.stamen.com/toner/{zoom}/{x}/{y}.jpg"
+}
 
 log = logging.getLogger(__name__)
 
 
-def stitch_map_tiles(grid, zoom):
+def stitch_map_tiles(grid, zoom, tileset):
     full_image_width  = len(grid[0])
     full_image_height = len(grid)
     total, count = full_image_width * full_image_height, 1
@@ -17,7 +24,7 @@ def stitch_map_tiles(grid, zoom):
     full_image = Image(width=full_image_width*256, height=full_image_height*256, format='png')
     for y, grid_row in enumerate(grid):
         for x, cell in enumerate(grid_row):
-            url = TILE_URL.format(zoom=zoom, x=cell[0], y=cell[1])
+            url = TILE_URLS[tileset].format(zoom=zoom, x=cell[0], y=cell[1])
             log.debug('Getting image %s/%s: (%s)..', count, total, url)
             tile_image = Image(file=urllib2.urlopen(url))
             log.debug('Compositing into full image.')
@@ -28,10 +35,10 @@ def stitch_map_tiles(grid, zoom):
     return full_image
 
 
-def create_tile_map(x_tile_center, y_tile_center, image_width, image_height, zoom):
+def create_tile_map(x_tile_center, y_tile_center, image_width, image_height, zoom, tileset):
     grid = gen_tile_indices(x_tile_center, y_tile_center, image_width, image_height)
     log.debug('\n' + '\n'.join([str(r) for r in grid]))
-    full_image = stitch_map_tiles(grid, zoom)
+    full_image = stitch_map_tiles(grid, zoom, tileset)
 
     x_offset = int(((x_tile_center % 1)) * 256 - (image_width / 2.0) % 256)
     y_offset = int(((y_tile_center % 1)) * 256 - (image_height / 2.0) % 256)
@@ -42,7 +49,7 @@ def create_tile_map(x_tile_center, y_tile_center, image_width, image_height, zoo
     return full_image
 
 
-def create_map(latitude, longitude, zoom, image_width, image_height):
+def create_map(latitude, longitude, zoom, image_width, image_height, tileset='osm'):
     x_tile_center, y_tile_center = coords_to_tile(latitude, longitude, zoom)
-    map_image = create_tile_map(x_tile_center, y_tile_center, image_width, image_height, zoom)
+    map_image = create_tile_map(x_tile_center, y_tile_center, image_width, image_height, zoom, tileset)
     return map_image
